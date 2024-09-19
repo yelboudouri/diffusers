@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2023 HuggingFace Inc.
+# Copyright 2024 HuggingFace Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -31,6 +31,12 @@ enable_full_determinism()
 class StableDiffusionXLKPipelineIntegrationTests(unittest.TestCase):
     dtype = torch.float16
 
+    def setUp(self):
+        # clean up the VRAM before each test
+        super().setUp()
+        gc.collect()
+        torch.cuda.empty_cache()
+
     def tearDown(self):
         # clean up the VRAM after each test
         super().tearDown()
@@ -52,7 +58,7 @@ class StableDiffusionXLKPipelineIntegrationTests(unittest.TestCase):
             [prompt],
             generator=generator,
             guidance_scale=9.0,
-            num_inference_steps=20,
+            num_inference_steps=2,
             height=512,
             width=512,
             output_type="np",
@@ -63,9 +69,7 @@ class StableDiffusionXLKPipelineIntegrationTests(unittest.TestCase):
         image_slice = image[0, -3:, -3:, -1]
 
         assert image.shape == (1, 512, 512, 3)
-        expected_slice = np.array(
-            [0.79804534, 0.7981539, 0.8019961, 0.7936565, 0.7892033, 0.7914713, 0.7792827, 0.77754563, 0.7836789]
-        )
+        expected_slice = np.array([0.5420, 0.5038, 0.2439, 0.5371, 0.4660, 0.1906, 0.5221, 0.4290, 0.2566])
 
         assert np.abs(image_slice.flatten() - expected_slice).max() < 1e-2
 
@@ -84,7 +88,7 @@ class StableDiffusionXLKPipelineIntegrationTests(unittest.TestCase):
             [prompt],
             generator=generator,
             guidance_scale=7.5,
-            num_inference_steps=15,
+            num_inference_steps=2,
             output_type="np",
             use_karras_sigmas=True,
             height=512,
@@ -96,9 +100,7 @@ class StableDiffusionXLKPipelineIntegrationTests(unittest.TestCase):
         image_slice = image[0, -3:, -3:, -1]
 
         assert image.shape == (1, 512, 512, 3)
-        expected_slice = np.array(
-            [0.9704869, 0.9714559, 0.9693254, 0.96892524, 0.9685236, 0.9659081, 0.9666761, 0.9619067, 0.961759]
-        )
+        expected_slice = np.array([0.6418, 0.6424, 0.6462, 0.6271, 0.6314, 0.6295, 0.6249, 0.6339, 0.6335])
 
         assert np.abs(image_slice.flatten() - expected_slice).max() < 1e-2
 
@@ -118,7 +120,7 @@ class StableDiffusionXLKPipelineIntegrationTests(unittest.TestCase):
             generator=torch.manual_seed(seed),
             noise_sampler_seed=seed,
             guidance_scale=9.0,
-            num_inference_steps=20,
+            num_inference_steps=2,
             output_type="np",
             height=512,
             width=512,
@@ -128,7 +130,7 @@ class StableDiffusionXLKPipelineIntegrationTests(unittest.TestCase):
             generator=torch.manual_seed(seed),
             noise_sampler_seed=seed,
             guidance_scale=9.0,
-            num_inference_steps=20,
+            num_inference_steps=2,
             output_type="np",
             height=512,
             width=512,

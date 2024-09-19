@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2023 HuggingFace Inc.
+# Copyright 2024 HuggingFace Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -108,6 +108,27 @@ class ControlNetSDXL(ExamplesTestsAccelerate):
             --train_batch_size=1
             --gradient_accumulation_steps=1
             --controlnet_model_name_or_path=hf-internal-testing/tiny-controlnet-sdxl
+            --max_train_steps=4
+            --checkpointing_steps=2
+            """.split()
+
+            run_command(self._launch_args + test_args)
+
+            self.assertTrue(os.path.isfile(os.path.join(tmpdir, "diffusion_pytorch_model.safetensors")))
+
+
+class ControlNetSD3(ExamplesTestsAccelerate):
+    def test_controlnet_sd3(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            test_args = f"""
+            examples/controlnet/train_controlnet_sd3.py
+            --pretrained_model_name_or_path=DavyMorgan/tiny-sd3-pipe
+            --dataset_name=hf-internal-testing/fill10
+            --output_dir={tmpdir}
+            --resolution=64
+            --train_batch_size=1
+            --gradient_accumulation_steps=1
+            --controlnet_model_name_or_path=DavyMorgan/tiny-controlnet-sd3
             --max_train_steps=4
             --checkpointing_steps=2
             """.split()
